@@ -12,7 +12,20 @@
           "package_name": "com.example.firebase_task_manager"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "40882805489-dv7h5r22jd88ob7bfdk1q093ve8tshei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.firebase_task_manager",
+            "certificate_hash": "f8ff7db0a41b5b1b35645372e628e37be0a20a70"
+          }
+        },
+        {
+          "client_id": "40882805489-e4m9j1mtkloe560iuf4rl9to5oa7ubjv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDOmYtEsDqBXmerCOSfgMEjmzOHTynRzX8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "40882805489-e4m9j1mtkloe560iuf4rl9to5oa7ubjv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "40882805489-d2ef695empso6r3h3sdrmltv4es169tk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.firebaseTaskManager"
+              }
+            }
+          ]
         }
       }
     }
