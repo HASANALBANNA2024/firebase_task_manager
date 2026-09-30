@@ -44,7 +44,7 @@ class LoginScreen extends StatelessWidget {
                       const AppLogo(),
                       const SizedBox(height: 24),
                       const Text(
-                        "Plan it. \nSync it. \nDone",
+                        "Plan it.\nSync it.\nDone",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 40,

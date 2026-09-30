@@ -2,6 +2,7 @@ import 'package:firebase_task_manager/core/widgets/app_button.dart';
 import 'package:firebase_task_manager/core/widgets/app_logo.dart';
 import 'package:firebase_task_manager/core/widgets/app_message.dart';
 import 'package:firebase_task_manager/core/widgets/app_text_field.dart';
+import 'package:firebase_task_manager/features/add_task/add_task_screen.dart';
 import 'package:firebase_task_manager/features/sign_up/sign_up_screen.dart';
 import 'package:firebase_task_manager/firebase/authentication/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -124,6 +125,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         });
                         if (user != null) {
                           showCustomSnackBar(context, "Login Successful!");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddTaskScreen(),
+                            ),
+                          );
                         } else {
                           showCustomSnackBar(
                             context,
