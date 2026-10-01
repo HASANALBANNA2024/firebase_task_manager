@@ -4,23 +4,26 @@ import 'package:firebase_task_manager/core/widgets/app_message.dart';
 import 'package:firebase_task_manager/core/widgets/app_text_field.dart';
 import 'package:firebase_task_manager/features/add_task/add_task_screen.dart';
 import 'package:firebase_task_manager/features/sign_up/sign_up_screen.dart';
-import 'package:firebase_task_manager/firebase/authentication/auth_service.dart';
+// Import your auth provider file here
+// import 'package:firebase_task_manager/core/riverpod_provider/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
-  @override
-  State<SignInScreen> createState() => _SignInScreenState();
-}
+import '../../core/riverpod_provider/auth_provider.dart';
+import '../../firebase/authentication/auth_service.dart';
 
-class _SignInScreenState extends State<SignInScreen> {
-  final AuthService _authService = AuthService();
+class SignInScreen extends ConsumerWidget {
+  SignInScreen({super.key});
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch loading state and read auth notifier from Riverpod
+    final isLoading = ref.watch(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -37,6 +40,7 @@ class _SignInScreenState extends State<SignInScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              /// Back button
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -63,6 +67,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+
+              /// Email input field
               AppTextField(
                 controller: _emailController,
                 labelText: "Email",
@@ -70,6 +76,8 @@ class _SignInScreenState extends State<SignInScreen> {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 16),
+
+              /// Password input field
               AppTextField(
                 controller: _passwordController,
                 labelText: "Password",
@@ -78,11 +86,11 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               const SizedBox(height: 12),
 
-              /// forgot password
+              /// Forgot password link
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => _showResetPasswordDialog(context),
+                  onPressed: () => _showResetPasswordDialog(context, ref),
                   child: const Text(
                     "Forgot Password?",
                     style: TextStyle(
@@ -94,8 +102,8 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               const SizedBox(height: 24),
 
-              /// login button reusable widget
-              _isLoading
+              /// Login button with Riverpod loading state handler
+              isLoading
                   ? const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF00BFA5),
@@ -106,6 +114,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       onPressed: () async {
                         String email = _emailController.text.trim();
                         String password = _passwordController.text.trim();
+
                         if (email.isEmpty || password.isEmpty) {
                           showCustomSnackBar(
                             context,
@@ -113,33 +122,36 @@ class _SignInScreenState extends State<SignInScreen> {
                           );
                           return;
                         }
-                        setState(() {
-                          _isLoading = true;
-                        });
-                        var user = await _authService.signInWithEmail(
+
+                        // Call sign in with email from auth notifier
+                        var user = await authNotifier.signInWithEmail(
                           email,
                           password,
                         );
-                        setState(() {
-                          _isLoading = false;
-                        });
+
                         if (user != null) {
-                          showCustomSnackBar(context, "Login Successful!");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AddTaskScreen(),
-                            ),
-                          );
+                          if (context.mounted) {
+                            showCustomSnackBar(context, "Login Successful!");
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AddTaskScreen(),
+                              ),
+                            );
+                          }
                         } else {
-                          showCustomSnackBar(
-                            context,
-                            "Login Failed! Check your credentials.",
-                          );
+                          if (context.mounted) {
+                            showCustomSnackBar(
+                              context,
+                              "Login Failed! Check your credentials.",
+                            );
+                          }
                         }
                       },
                     ),
               const SizedBox(height: 24),
+
+              /// Navigate to sign up screen
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -153,9 +165,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
-                        ),
+                        MaterialPageRoute(builder: (context) => SignUpScreen()),
                       );
                     },
                     child: const Text(
@@ -175,8 +185,8 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  /// password reset dialogue
-  void _showResetPasswordDialog(BuildContext context) {
+  /// Password reset dialogue method
+  void _showResetPasswordDialog(BuildContext context, WidgetRef ref) {
     final TextEditingController resetEmailController = TextEditingController();
     showDialog(
       context: context,
@@ -207,14 +217,19 @@ class _SignInScreenState extends State<SignInScreen> {
               onPressed: () async {
                 String email = resetEmailController.text.trim();
                 if (email.isNotEmpty) {
-                  bool success = await _authService.resetPassword(email);
-                  Navigator.pop(context);
-                  showCustomSnackBar(
-                    context,
-                    success
-                        ? "Password reset link sent to your email"
-                        : "Failed to send reset link. check email.",
-                  );
+                  // Accessing auth service via riverpod provider inside dialog
+                  final authService = ref.read(authServiceProvider);
+                  bool success = await authService.resetPassword(email);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    showCustomSnackBar(
+                      context,
+                      success
+                          ? "Password reset link sent to your email"
+                          : "Failed to send reset link. Check your email.",
+                    );
+                  }
                 }
               },
               child: const Text("Send"),

@@ -1,4 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_task_manager/core/riverpod_provider/auth_provider.dart';
+import 'package:firebase_task_manager/features/add_task/add_task_screen.dart';
 import 'package:firebase_task_manager/features/login/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,19 +13,30 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Firebase Task Manager",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00BFA5)),
-        useMaterial3: true,
+      home: authState.when(
+        data: (user) {
+          if (user != null) {
+            return AddTaskScreen();
+          }
+          return LoginScreen();
+        },
+        error: (error, stackTrace) =>
+            Scaffold(body: Center(child: Text("Error $error"))),
+        loading: () => const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(color: Color(0xFF0E9F8E)),
+          ),
+        ),
       ),
-      home: const LoginScreen(),
     );
   }
 }

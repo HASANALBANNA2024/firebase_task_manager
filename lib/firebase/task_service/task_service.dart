@@ -61,7 +61,7 @@ class TaskService {
         'priority': priority,
         'date': date,
         'time': time,
-        'remindMe': false,
+        'remindMe': remindMe,
         'isCompleted': isCompleted,
         'updatedAt': FieldValue.serverTimestamp(),
       });

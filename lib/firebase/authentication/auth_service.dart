@@ -1,11 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import "package:google_sign_in/google_sign_in.dart";
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// sign up
+  /// Sign up with email and password
   Future<User?> signUpWithEmail(String email, String password) async {
     try {
       UserCredential credential = await _auth.createUserWithEmailAndPassword(
@@ -19,7 +20,7 @@ class AuthService {
     }
   }
 
-  /// sign in
+  /// Sign in with email and password
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       UserCredential credential = await _auth.signInWithEmailAndPassword(
@@ -33,7 +34,7 @@ class AuthService {
     }
   }
 
-  /// password recovery / reset password
+  /// Password reset/recovery
   Future<bool> resetPassword(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -49,21 +50,17 @@ class AuthService {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
-      /// google initialized with Web Client ID
       await googleSignIn.initialize(
         serverClientId: '40882805489-e4m9j1mtkloe560iuf4rl9to5oa7ubjv.apps.googleusercontent.com',
       );
 
-      /// new authenticate
       final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
 
-      /// access token scope authorization
       final List<String> scopes = ['email', 'profile'];
       final clientAuth = await googleUser.authorizationClient.authorizeScopes(
         scopes,
       );
 
-      /// credential create for firebase
       final credential = GoogleAuthProvider.credential(
         idToken: googleUser.authentication.idToken,
         accessToken: clientAuth.accessToken,
@@ -79,9 +76,14 @@ class AuthService {
     return null;
   }
 
-  /// log out
+  /// Sign out
   Future<void> signOut() async {
     await GoogleSignIn.instance.signOut();
     await _auth.signOut();
   }
 }
+
+/// AuthService provider
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});

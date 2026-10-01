@@ -2,15 +2,19 @@ import 'package:firebase_task_manager/core/widgets/app_button.dart';
 import 'package:firebase_task_manager/core/widgets/app_logo.dart';
 import 'package:firebase_task_manager/core/widgets/app_message.dart';
 import 'package:firebase_task_manager/features/sign_in/sign_in_screen.dart';
-import 'package:firebase_task_manager/firebase/authentication/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LoginScreen extends StatelessWidget {
+import '../../core/riverpod_provider/auth_provider.dart';
+
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch loading state and read auth notifier from Riverpod
+    final isLoading = ref.watch(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
 
     return Scaffold(
       body: Container(
@@ -40,7 +44,7 @@ class LoginScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// logo icon
+                      /// Logo icon
                       const AppLogo(),
                       const SizedBox(height: 24),
                       const Text(
@@ -54,7 +58,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      /// subtitle title text
+                      /// Subtitle title text
                       Text(
                         "Tasks save to the cloud and remind you on every device.",
                         style: TextStyle(
@@ -65,30 +69,41 @@ class LoginScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 48),
 
-                      AppButton(
-                        text: "Continue with Google",
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black87,
-                        icon: const Icon(Icons.person_outline),
-                        onPressed: () async {
-                          var user = await authService.signInWithGoogle();
-                          if (user != null) {
-                            showCustomSnackBar(
-                              context,
-                              "Google sign-in Successfull: ${user.displayName}",
-                            );
-                          }
-                        },
-                      ),
+                      /// Google sign-in button with loading indicator support
+                      isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF0E9F8E),
+                              ),
+                            )
+                          : AppButton(
+                              text: "Continue with Google",
+                              backgroundColor: Colors.white,
+                              textColor: Colors.black87,
+                              icon: const Icon(Icons.person_outline),
+                              onPressed: () async {
+                                var user = await authNotifier
+                                    .signInWithGoogle();
+                                if (user != null) {
+                                  if (context.mounted) {
+                                    showCustomSnackBar(
+                                      context,
+                                      "Google sign-in Successful: ${user.displayName}",
+                                    );
+                                  }
+                                }
+                              },
+                            ),
                       const SizedBox(height: 16),
 
+                      /// Email sign-in button
                       AppButton(
                         text: "Sign in with email",
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const SignInScreen(),
+                              builder: (context) => SignInScreen(),
                             ),
                           );
                         },

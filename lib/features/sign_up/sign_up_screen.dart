@@ -2,27 +2,25 @@ import 'package:firebase_task_manager/core/widgets/app_button.dart';
 import 'package:firebase_task_manager/core/widgets/app_logo.dart';
 import 'package:firebase_task_manager/core/widgets/app_message.dart';
 import 'package:firebase_task_manager/core/widgets/app_text_field.dart';
-import 'package:firebase_task_manager/firebase/authentication/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+import '../../core/riverpod_provider/auth_provider.dart';
 
-  @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
-}
+class SignUpScreen extends ConsumerWidget {
+  SignUpScreen({super.key});
 
-class _SignUpScreenState extends State<SignUpScreen> {
-  final AuthService _authService = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  bool _isLoading = false;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch loading state and read auth notifier from Riverpod
+    final isLoading = ref.watch(authNotifierProvider);
+    final authNotifier = ref.read(authNotifierProvider.notifier);
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -43,7 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// back button
+                /// Back button
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -52,11 +50,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                /// reusable logo
+                /// Reusable logo
                 const AppLogo(size: 60, iconSize: 32),
                 const SizedBox(height: 24),
 
-                /// title
+                /// Title
                 const Text(
                   "Create Account",
                   style: TextStyle(
@@ -75,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                /// email field
+                /// Email input field
                 AppTextField(
                   controller: _emailController,
                   labelText: "Email",
@@ -84,7 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                /// password field
+                /// Password input field
                 AppTextField(
                   controller: _passwordController,
                   labelText: "Password",
@@ -93,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                /// confirm password filed
+                /// Confirm password input field
                 AppTextField(
                   controller: _confirmPasswordController,
                   labelText: "Confirm Password",
@@ -102,8 +100,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                /// sign up button
-                _isLoading
+                /// Sign up button with Riverpod loading state handler
+                isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
                           color: Color(0xFF00BFA5),
@@ -144,30 +142,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             return;
                           }
 
-                          setState(() => _isLoading = true);
-                          var user = await _authService.signUpWithEmail(
+                          // Call sign up with email from auth notifier
+                          var user = await authNotifier.signUpWithEmail(
                             email,
                             password,
                           );
-                          setState(() => _isLoading = false);
 
                           if (user != null) {
-                            showCustomSnackBar(
-                              context,
-                              "Registration Successful!",
-                            );
-                            Navigator.pop(context);
+                            if (context.mounted) {
+                              showCustomSnackBar(
+                                context,
+                                "Registration Successful!",
+                              );
+                              Navigator.pop(context);
+                            }
                           } else {
-                            showCustomSnackBar(
-                              context,
-                              "Registration Failed! Try again.",
-                            );
+                            if (context.mounted) {
+                              showCustomSnackBar(
+                                context,
+                                "Registration Failed! Try again.",
+                              );
+                            }
                           }
                         },
                       ),
                 const SizedBox(height: 24),
 
-                /// already have an account
+                /// Already have an account row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
