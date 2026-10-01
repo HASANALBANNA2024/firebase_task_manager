@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TaskService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// Present user logged in
   String? get currentUserId => _auth.currentUser?.uid;
 
   /// ---------------Task Operation-----------------
@@ -22,13 +20,17 @@ class TaskService {
   }) async {
     try {
       if (currentUserId == null) return false;
+
+      // Print debug log to verify in terminal before sending
+      debugPrint("Sending to Firestore -> remindMe: $remindMe");
+
       await _firestore.collection('tasks').add({
         'userId': currentUserId,
         'title': title,
         'notes': notes,
         'category': category,
         'priority': priority,
-        'remindMe': false,
+        'remindMe': remindMe, // Param value
         'date': date,
         'time': time,
         'isCompleted': false,
@@ -104,8 +106,4 @@ class TaskService {
       return false;
     }
   }
-
-  final taskServiceProvider = Provider<TaskService>((ref) {
-    return TaskService();
-  });
 }
