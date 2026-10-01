@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_task_manager/core/riverpod_provider/auth_provider.dart';
-import 'package:firebase_task_manager/features/add_task/add_task_screen.dart';
 import 'package:firebase_task_manager/features/login/login_screen.dart';
+import 'package:firebase_task_manager/main_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +25,7 @@ class MyApp extends ConsumerWidget {
       home: authState.when(
         data: (user) {
           if (user != null) {
-            return AddTaskScreen();
+            return MainNavigationScreen();
           }
           return LoginScreen();
         },
