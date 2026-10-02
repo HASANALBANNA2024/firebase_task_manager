@@ -1,3 +1,4 @@
+import 'package:firebase_task_manager/features/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,7 +9,7 @@ class MainNavigationScreen extends ConsumerWidget {
   const MainNavigationScreen({super.key});
 
   static const List<Widget> _screens = [
-    Center(child: Text('Home Screen', style: TextStyle(fontSize: 20))),
+    HomeScreen(),
     Center(child: Text('Calendar Screen', style: TextStyle(fontSize: 20))),
     Center(child: Text('Alerts Screen', style: TextStyle(fontSize: 20))),
     Center(child: Text('Profile Screen', style: TextStyle(fontSize: 20))),

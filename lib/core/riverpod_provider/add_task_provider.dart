@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_task_manager/firebase/task_service/task_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,4 +90,34 @@ final taskFormProvider =
 
 final taskServiceProvider = Provider<TaskService>((ref) {
   return TaskService();
+});
+
+/// stream provider to fetch tasks in real-time for the UI
+final userTaskStreamProvider = StreamProvider.autoDispose<QuerySnapshot>((ref) {
+  final taskservice = ref.watch(taskServiceProvider);
+  return taskservice.getUserTasks();
+});
+
+/// user profile data provider to fetch name, phone, email,
+final userProfileProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((
+  ref,
+) async {
+  final taskService = ref.watch(taskServiceProvider);
+  return await taskService.getUserProfile();
+});
+
+/// filter chip Notifier
+class FilterNotifier extends Notifier<String> {
+  @override
+  String build() {
+    return "All";
+  }
+
+  void setFilter(String filter) {
+    state = filter;
+  }
+}
+
+final selectedFilterProvider = NotifierProvider<FilterNotifier, String>(() {
+  return FilterNotifier();
 });

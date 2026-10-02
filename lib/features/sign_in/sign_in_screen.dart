@@ -2,8 +2,8 @@ import 'package:firebase_task_manager/core/widgets/app_button.dart';
 import 'package:firebase_task_manager/core/widgets/app_logo.dart';
 import 'package:firebase_task_manager/core/widgets/app_message.dart';
 import 'package:firebase_task_manager/core/widgets/app_text_field.dart';
-import 'package:firebase_task_manager/features/add_task/add_task_screen.dart';
 import 'package:firebase_task_manager/features/sign_up/sign_up_screen.dart';
+import 'package:firebase_task_manager/main_navigation_screen.dart';
 // Import your auth provider file here
 // import 'package:firebase_task_manager/core/riverpod_provider/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -135,7 +135,7 @@ class SignInScreen extends ConsumerWidget {
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => AddTaskScreen(),
+                                builder: (context) => MainNavigationScreen(),
                               ),
                             );
                           }

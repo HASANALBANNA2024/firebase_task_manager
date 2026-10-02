@@ -43,6 +43,23 @@ class TaskService {
     }
   }
 
+  /// get function
+  Stream<QuerySnapshot> getUserTasks() {
+    try {
+      if (currentUserId == null) {
+        return const Stream.empty();
+      }
+      return _firestore
+          .collection('tasks')
+          .where('userId', isEqualTo: currentUserId)
+          .orderBy('createdAt', descending: true)
+          .snapshots();
+    } catch (e) {
+      debugPrint("Error getting tasks: $e");
+      rethrow;
+    }
+  }
+
   /// task update
   Future<bool> updateTask({
     required String taskId,
@@ -75,6 +92,23 @@ class TaskService {
     }
   }
 
+  /// update task only
+  // Future<bool> updateTaskCompletion({
+  //   required String taskId,
+  //   required bool isCompleted,
+  // }) async {
+  //   try {
+  //     await _firestore.collection('tasks').doc(taskId).update({
+  //       'isCompleted': isCompleted,
+  //       'updatedAt': FieldValue.serverTimestamp(),
+  //     });
+  //     return true;
+  //   } catch (e) {
+  //     debugPrint("Error updating task completion: $e");
+  //     return false;
+  //   }
+  // }
+
   /// delete task
   Future<bool> deleteTask(String taskId) async {
     try {
@@ -93,7 +127,7 @@ class TaskService {
   }) async {
     try {
       if (currentUserId == null) return false;
-      await _firestore.collection('tasks').doc(currentUserId).set({
+      await _firestore.collection('users').doc(currentUserId).set({
         'uid': currentUserId,
         'name': name,
         'phone': phone,
@@ -104,6 +138,28 @@ class TaskService {
     } catch (e) {
       debugPrint("Error updating profile: $e");
       return false;
+    }
+  }
+
+  /// Get Profile
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      if (currentUserId == null) return null;
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+      if (doc.exists && doc.data() != null) {
+        return doc.data() as Map<String, dynamic>;
+      }
+      return {
+        'name': _auth.currentUser?.displayName ?? 'User',
+        'email': _auth.currentUser?.email ?? '',
+        'phone': _auth.currentUser?.phoneNumber ?? '',
+      };
+    } catch (e) {
+      debugPrint("Error fetching user profile: $e");
+      return null;
     }
   }
 }
